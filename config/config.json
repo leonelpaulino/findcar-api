@@ -2,21 +2,21 @@
   "development": {
     "username": "root",
     "password": "123123",
-    "database": "mysql",
+    "database": "findcarDB",
     "host": "localhost",
     "dialect": "mysql"
   },
   "test": {
     "username": "root",
     "password": "123123",
-    "database": "mysql",
+    "database": "findcarDB",
     "host": "localhost",
     "dialect": "mysql"
   },
   "production": {
     "username": "root",
     "password": "123123",
-    "database": "mysql",
+    "database": "findcarDB",
     "host": "localhost",
     "dialect": "mysql"
   }

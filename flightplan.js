@@ -1,7 +1,7 @@
 var plan = require('flightplan');
 
-var appName = 'FindCarApi';
-var username = 'root';
+var appName = 'findcar-api';
+var username = 'deploy';
 var startFile = 'Server.js';
 
 var tmpDir = appName+'-' + new Date().getTime();
@@ -17,9 +17,8 @@ plan.target('staging', [
 
 plan.target('production', [
   {
-    host: '104.131.48.2',
+    host: '159.203.138.159',
     username: username,
-    password: '',
     agent: process.env.SSH_AUTH_SOCK
   },
 //add in another server if you have more than one
@@ -54,5 +53,5 @@ plan.remote(function(remote) {
   remote.log('Reload application');
   remote.sudo('ln -snf ~/' + tmpDir + ' ~/'+appName, {user: username});
   remote.exec('forever stop ~/'+appName+'/'+startFile, {failsafe: true});
-  remote.exec('forever start ~/'+appName+'/'+startFile);
+  remote.exec('sudo restart node-app'); 
 });

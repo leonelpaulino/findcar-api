@@ -18,7 +18,7 @@
     "mysql": "^2.9.0",
     "cors": "^2.6.1",
     "morgan": "^1.6.0",
-    "file-stream-rotator" : "^0.0.6"
+    "file-stream-rotator": "^0.0.6"
   },
   "devDependencies": {
     "fly": "~0.8.3"
