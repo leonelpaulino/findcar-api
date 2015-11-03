@@ -1,0 +1,26 @@
+{
+  "name": "CarFinder",
+  "version": "1.0.0",
+  "description": "web API usando node.js , mysql",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leonelpaulino/FindCarAPI.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt-nodejs": "^0.0.3",
+    "body-parser": "^1.12.2",
+    "express": "^4.12.3",
+    "jsonwebtoken": "^4.2.1",
+    "sequelize": "^3.8.25",
+    "mysql": "^2.9.0",
+    "cors": "^2.6.1",
+    "morgan": "^1.6.0",
+    "file-stream-rotator" : "^0.0.6"
+  },
+  "devDependencies": {
+    "fly": "~0.8.3"
+  }
+}
