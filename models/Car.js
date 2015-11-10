@@ -1,29 +1,31 @@
 'use strict'
 module.exports = CarModel;
 function CarModel (db,types) {
-	 	var Model = db.define('Car',{
-  		transmision: {
-	    type: types.ENUM('Tracción Trasera', 'Tracción Delantera', 
-	    					 'Tracción Trasera y Traccion Delantera')
+	 	var Model = db.define('Car',
+	 	{
+	  		transmision: {
+		    type: types.ENUM('Tracción Trasera', 'Tracción Delantera', 
+		    					 'Tracción Trasera y Traccion Delantera')
+			},
+			combustible: {
+			 type: types.ENUM ('Gasolina','Disel')
+			},
+			km: types.INTEGER,
+			year: types.INTEGER,
+			price: types.INTEGER,
 		},
-		combustible: {
-		 type: types.ENUM ('Gasolina','Disel')
-		},
-		km: types.INTEGER,
-		year: types.INTEGER,
-		price: types.INTEGER
-},
 	{
-		classMethod: {
+		classMethods: {
 			associate: function(models){
-				car.belongsTo(models.Model, {as: 'Model'});
-				car.belongsTo(models.User, {as : 'User'});
-				car.belongsTo(models.Colors,{as: 'Color'});
-				car.belongsTo(models.Manufacturer,{as: 'Manufacturer'});
-				car.belongsToMany(models.WishList,{
+				Model.belongsTo(models.Model);
+				Model.belongsTo(models.User);
+				Model.belongsTo(models.Color);
+				Model.belongsTo(models.Manufacturer);
+				Model.hasMany(models.Image);
+				Model.belongsToMany(models.WishList,{
 					through: {
 						model: models.CarWishList,
-						unique: false,
+						unique: true,
 					},
 					foreignKey: 'CarId',
 				});

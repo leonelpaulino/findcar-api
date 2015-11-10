@@ -13,6 +13,5 @@ if (err != null) {
 	var message = err.message;
 }
 res.writeHead(http_code,{"Content-Type": "application/json"});
-
 res.end(JSON.stringify({error: !!err , message: message, data: data}) + "\n");
 }

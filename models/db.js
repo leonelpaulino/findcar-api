@@ -23,13 +23,13 @@ fs
     var model = sequelize['import'](path.join(__dirname, file));
     db[model.name] = model;
   });
-
 Object.keys(db).forEach(function(modelName) {
   if (db[modelName].associate) {
     db[modelName].associate(db);
+  
   }
 });
 
 sequelize.sync(); // En caso de que se haga algun cambio se reflejara en la base de datos.
-db.Sequelize = Sequelize;
+db.Sequelize = sequelize;
 module.exports = db; 

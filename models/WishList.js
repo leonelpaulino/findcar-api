@@ -8,11 +8,11 @@ function WishListModel (db,types) {
 	{
 		classMethod: {
 			associate: function(models){
-				Model.belogsTo(models.user);
-				Model.belongsToMany(models.car,{
+				Model.belogsTo(models.User);
+				Model.belongsToMany(models.Car,{
 					through: {
-					model: models.car_wishlist,
-					unique: false,
+					model: models.CarWishList,
+					unique: true,
 				},
 				foreignKey: 'WishListId',
 				});

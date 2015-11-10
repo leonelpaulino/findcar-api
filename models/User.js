@@ -50,7 +50,7 @@ function UserModel (db,types) {
 		classMethods: {
 			associate: function(models){
 			 Model.hasMany(models.Car, {as: 'Cars'});
-			 Model.hasOne(models.WishList,{as:'WishList'})
+			 // Model.hasOne(models.WishList,{as:'WishList'})
 			},
 	      	verifyPassword: function(password,hashPassword) {
        	 		return bcrypt.compareSync(password, hashPassword); {
