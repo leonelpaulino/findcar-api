@@ -18,7 +18,6 @@ var responseHelpers = require('./../Helpers/responseHelper.js'),
 * @param [req] Peticion del cliente.
 */
 router.post('/',authentication,function (req,res){
-	console.log(res.userName );
 			Car.create({
 				UserUserName:  res.userName,
 				ManufacturerId: req.body.manufacturerId,
@@ -142,35 +141,28 @@ router.get('/',function (req,res){
 				};
 				if (req.query.price1 != null && req.query.price2 != null)
 					params.Price = {$gte:req.query.price1, $lte: req.query.price2};
-				else if (req.query.price1 != null && req.query.gtprice != null && req.query.gtprice == 1)
-				 	params.Price = {$gte:req.query.price1};
-				else if (req.query.price1 != null && req.query.ltprice != null && req.query.ltprice == 1)
-					params.Price = {$lte:req.query.price1};
 				else if (req.query.price1 != null)
-					params.Price = req.query.price1;
+				 	params.Price = {$gte:req.query.price1};
+				else if (req.query.price2 != null )
+					params.Price = {$lte:req.query.price2};
 				if (req.query.km1 != null && req.query.km2 != null)
 					params.km = {$gte:req.query.km1, $lte: req.query.km2};
-				else if (req.query.km != null && req.query.gtkm != null && req.query.gtkm == "1")
-				 	params.km = {$gte:req.query.km1};
-				else if (req.query.km != null && req.query.ltkm != null && req.query.ltkm == "1")
-					params.km = {$lte:req.query.km1};
 				else if (req.query.km1 != null)
-					params.km = req.query.km1;
+				 	params.km = {$gte:req.query.km1};
+				else if (req.query.km2 != null )
+					params.km = {$lte:req.query.km2};
 				if (req.query.year1 != null && req.query.year2 != null)
 					params.year = {$gte:req.query.year1, $lte: req.query.year2};
-				else if (req.query.year1 != null && req.query.gtyear != null && req.query.gtyear == "1")
-				 	params.year = {$gte:req.query.year1};
-				else if (req.query.year1 != null && req.query.ltyear != null && req.query.ltyear == "1")
-					params.year = {$lte:req.query.year1};
 				else if (req.query.year1 != null)
-					params.year = req.query.year1;
+				 	params.year = {$gte:req.query.year1};
+				else if (req.query.year2 != null)
+					params.year = {$lte:req.query.year2};
 				  for (var key in params){
 				  	if ( params.hasOwnProperty(key) && 
 				  	     (params[key] == undefined || params[key] == '')
 				  		)
 				  		delete params[key];
 				  }
-		console.log(params);
 	  	Car.findAll({ where: params, offset: (page-1)*pageSize, limit: pageSize})
 	 		.then(function(collection){
 	 			carHelper.returnCars(collection,function(err,result){
