@@ -21,9 +21,9 @@ var accessLogStream = FileStreamRotator.getStream({
 })
 app.use(morgan('combined',{stream: accessLogStream}));
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 
 app.use('/users',UserController);
 

@@ -7,6 +7,7 @@ function ImagesModel (db,types) {
 		    	type: types.STRING,
 		    	primaryKey: true
 			}
+			
 		},
 		{
 	 		classMethods: {

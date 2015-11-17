@@ -15,7 +15,7 @@ exports.version = "1.0.0";
 * @param [next] callback que se encarga de llamar la proxima ruta.
 */
 exports.authentication = function (req,res,next){
-    var token = req.body.token || req.params['token'] || req.headers['x-access-token'];
+    var token = req.body.token || req.headers['token'] || req.headers['x-access-token'];
     if(token){
         jsonwebtoken.verify(token,secretKey,function(err, decoded){
             if (err){

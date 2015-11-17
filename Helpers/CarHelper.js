@@ -9,70 +9,179 @@ exports.version = '1.0.0';
 	Images = Model.Image;
 	async = require('async');
 
+/* 
+* @brief
+*  funcion que se encarga de buscar todas las imagenes de un carro dado su  id
+* @param [id] id del carro
+* @param [callback] callback 
+*/
 exports.getImage = function (id,callback){
-	var params = {
-		CarId: id
-	}
-	console.log(params);
-	Images.findAll({Where: {CarId:3}}).then(function(collection){
-		console.log(collection);
+	Images.findAll({where:{CarId:id}}).then(function(collection){
 		async.forEachSeries(collection,function(value,callback1){
 			value.dataValues.base64Image = fs.readFileSync(value.dataValues.imagepath).toString('base64');
 			callback1();
 		},function(err){
 			if (err) 
 				callback(err,null);
-			else 
+			else {
 				callback(null,collection);
+				
+			}
 		});
 	});	
 }
-exports.addImage = function (base64,id){
+/* 
+* @brief
+*  funcion que se encarga de agregar una imagen nueva a un carro
+* @param [base64] Imagen.
+* @param [id] id del carro
+* @param [callback] callback 
+*/
+exports.addImage = function (base64,id,callback){
 	var decoded = new Buffer(base64,'base64');
 		var imagepath = 'cars/'+Guid.raw()+'.jpg'
 		fs.writeFile(imagepath,decoded,'binary',function(err){
-			if ( err) throw err;
 			Images.create({
 				imagepath: imagepath,
 				CarId : id
+			})
+			.then(function(c){
+				if ( callback != null )
+					callback();
 			});
 		});
 }
-exports.returnCars = function(collection,call){
-	async.forEachSeries(collection,function(value,callback){
-			async.waterfall([function(callback2){
-				Models.findById(value.dataValues.ModelId).then(function(model){
-					callback2(null,model);
+/* 
+* @brief
+*  funcion que se encarga de actualizar las imagenes de un carro.
+* @param [ImageCollection] Imagenes.
+* @param [id] id del carro
+* @param [callback1] callback 
+*/
+exports.updateImage = function(imageCollection,id,callback1){
+	Images.findAll({where:{CarId:id}}).then(function(collection){
+		console.log(imageCollection);
+		async.forEachSeries(imageCollection,function(value,callback){
+			
+			var found = false;
+			for (var i in collection)
+			{
+				if (collection[i].dataValues.imagepath == value.imagepath){
+					found=true;
+					delete collection[i];
+					break;
+				}
+			}
+			if (value.imagepath == null || value.imagepath == "" ){
+				exports.addImage(value.base64Image,id,function(){
+					callback();
 				});
-			},function(model,callback2){
-				value.dataValues.Model = model.dataValues;
-				Color.findById(value.dataValues.ColorId).then(function(color){
-					callback2(null,color);
-				});
-			},function(color,callback2){
-				value.dataValues.Color = color.dataValues;
-				Manufacturer.findById(value.dataValues.ManufacturerId).then(function(manufacturer){
-					callback2(null,manufacturer);
-				});
-
-			},function(manufacturer,callback2){
-				value.dataValues.Manufacturer = manufacturer;
-				carHelper.getImage(value.dataValues.id,function(err,images){
-					callback2(null,images);
-				});
-			},function(images,callback2){
-				value.dataValues.images = images;
+			}
+			else if (found) {
+				var decoded = new Buffer(value.base64Image,'base64');
+				fs.writeFileSync(value.imagepath,decoded,'binary');
 				callback();
-			}]);
+			}
+			else {
+				callback();
+			}
+		},function(err){
+			for ( var i in collection )
+			{
+				deleteImagesById(collection[i].dataValues.imagepath);
+			}
+			callback1();
+		});
+	});
+}
+/* 
+* @brief
+*  funcion que se encarga de retornar un objeto carro con todas sus relaciones (menos la de usuario)
+* @param [c] el objeto Carro.
+* @param [callback] callback 
+*/
+exports.returnCar = function (c,callback){
+	console.log(c.dataValues);	
+	async.waterfall([function(callback2){
+		Models.findById(c.dataValues.ModelId).then(function(model){
+			callback2(null,model);
+		});
+	},function(model,callback2){
+
+		c.dataValues.Model = model.dataValues;
+		Color.findById(c.dataValues.ColorId).then(function(color){
+			callback2(null,color);
+		});
+	},function(color,callback2){
+
+		c.dataValues.Color = color.dataValues;
+		Manufacturer.findById(c.dataValues.ManufacturerId).then(function(manufacturer){
+
+			callback2(null,manufacturer);
+		});
+
+	},function(manufacturer,callback2){
+
+			console.log(c.dataValues);	
+		c.dataValues.Manufacturer = manufacturer;
+
+		exports.getImage(c.dataValues.id,function(err,images){
+			
+			callback2(null,images);
+		});
+	},function(images,callback2){
+		c.dataValues.images = images;
+		callback(null,c);
+	}]);
+
+}
+/* 
+* @brief
+*  funcion que se encarga de retornar una lista de  objeto carro con todas sus relaciones (menos la de usuario)
+* @param [collection] collection del objeto carro.
+* @param [callback1] callback 
+*/
+exports.returnCars = function(collection,callback1){
+	async.forEachSeries(collection,function(value,callback){
+			exports.returnCar(value,function(c){
+				value = c;
+				callback();
+			});
 	},function(err){
 		if ( err == null)
-			call(null,collection);	
+			callback1(null,collection);	
 		else 
-			call(err,null);
+			callback1(err,null);
 	});	
 }
-exports.deleteImages = function(id){
-	findById(id).then(function(image){
-		fs.unlinkSync(image.dataValues.imagepath);
+/* 
+* @brief
+*  funcion que se encarga de eliminar las imagenes de un carro
+* @param [id] id del carro
+* @param [callback] callback 
+*/
+exports.deleteImages= function(id,callback){
+	Images.findAll({where:{CarId:id}}).then(function(collection){
+		async.forEachSeries(collection,function(value,callback1){
+			deleteImagesById(value.dataValues.imagepath);
+			callback1();
+		},function(err){
+			if (err) 
+				callback(err);
+			else 
+				callback(null);
+		});
+	});
+}
+/* 
+* @brief
+*  funcion que se encarga de eliminar una imagen dado su id.
+* @param [c] el objeto Carro.
+* @param [callback] callback 
+*/
+function deleteImagesById (id){
+	Images.findById(id).then(function(image){
+		fs.unlink(image.dataValues.imagepath);
+		image.destroy();
 	});
 }

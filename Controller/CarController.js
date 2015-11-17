@@ -32,10 +32,21 @@ router.post('/',authentication,function (req,res){
 			)		
 		.then(function(c){
 			async.forEachSeries(req.body.image,function(value,callback){
-				carHelper.addImage(value,c.id);
-				callback();	
+				carHelper.addImage(value,c.id,function(){
+					callback();		
+				});
+				
 			},function(err){
-				responseHelpers.sendResponse(res,200,null,req.body);
+				if (err)
+				 responseHelpers.sendResponse(res,400,{message:err.message},null);	
+				else {
+					carHelper.returnCar(c,function(err,result){
+					 	if (err == null) 
+ 							responseHelpers.sendResponse(res,200,null,result);		
+						else 
+ 							responseHelpers.sendResponse(res,400,{message:err.message},null);	
+	 				});
+				}
 			});
 		}).catch(function(err){
 			responseHelpers.sendResponse(res,400,{message: err.message},null);	
@@ -53,16 +64,13 @@ router.delete('/:carid',authentication,function (req,res){
 	.then(function(c){
 		if ( c == null)
 			responseHelpers.sendResponse(res,400,{message: "No existen carros con este id."},null);
-		carHelper.getImage(c.id,function(collection){
-			async.forEachSeries(collection,function(value,callaback){
-				carHelper.deleteImage(value.dataValues.id);	
-				callback();
-			},function(err){
-				c.destroy();
-	   			responseHelpers.sendResponse(res,200,{message: "Registro Borrado!"},null);		
-			});
-		});
-	   
+		carHelper.deleteImages(c.dataValues.id,function(err){
+			if (err)
+				responseHelpers.sendResponse(res,400,{message: err.message},null);
+			c.destroy();	
+			responseHelpers.sendResponse(res,200,{message: "El Registro fue borrado!"},null);
+
+		});	
 	})
 	.catch(function(err){	
 		responseHelpers.sendResponse(res,400,{message: err.message},null);
@@ -79,43 +87,38 @@ router.delete('/:carid',authentication,function (req,res){
 router.put('/',authentication,function (req,res){
 	Car.findOne({where: { id: req.body.id} })
 		.then(function (c) {
-			if (c == null )
+			if (c == null ){
 				responseHelpers.sendResponse(res,400,{message: "No existen carros con este id."},null);
-				carHelper.getImage(c.id,function(collection){
-					async.forEachSeries(collection,function(value,callaback){
-						carHelper.deleteImage(value.dataValues.id);	
-						callback();
-					},function(err){
-						async.forEachSeries(req.body.image,function(value,callback){
-							carHelper.addImage(value,c.id);
-							callback();	
-						},function(err){
-								if (err !=null) 
-							responseHelpers.sendResponse(res,400,{message: err.message},null);
-							c.updateAttributes({
-								ColorId : req.body.colorId,
-								ModelId : req.body.modelId,
-								UserUserName :  res.userName,
-								price : req.body.price,
-								km : req.body.km,
-								year : req.body.year,
-								combustible : req.body.combustible,
-								transmision : req.body.transmision,
-								ManufacturerId: req.body.ManufacturerId
-							})
-							.then(function(c){
-								responseHelpers.sendResponse(res,200,null,c);
-							})
-						   .catch(function (err){
-								responseHelpers.sendResponse(res,400,{message: err.message},null);
-						    });
-						});	
-					});
-				});
-		})
-		.catch(function (err){
-			responseHelpers.sendResponse(res,400,{message: err.message},null);
-		});
+			}
+			carHelper.updateImage(req.body.image,c.id,function(){
+				c.updateAttributes({
+					ColorId : req.body.colorId,
+					ModelId : req.body.modelId,
+					UserUserName :  res.userName,
+					price : req.body.price,
+					km : req.body.km,
+					year : req.body.year,
+					combustible : req.body.combustible,
+					transmision : req.body.transmision,
+					ManufacturerId: req.body.ManufacturerId
+				})
+				.then(function(val){
+					carHelper.returnCar(val,function(err,result){
+	 					if (err == null) 
+	 						responseHelpers.sendResponse(res,200,null,result);		
+	 					else 
+	 						responseHelpers.sendResponse(res,400,{message:err.message},null);	
+	 				});
+				})
+			    .catch(function (err){
+						responseHelpers.sendResponse(res,400,{message: err.message},null);
+		    	});
+		
+			});
+		})	
+	.catch(function (err){
+		responseHelpers.sendResponse(res,400,{message: err.message},null);
+	});
 });
 /* 
 * @brief
@@ -128,9 +131,6 @@ router.get('/',function (req,res){
 	var pageSize = req.query.offset == undefined ? 50 : req.query.offset; 
 	page = page < 0 ? 1:page;
 	pageSize = pageSize < 0 ? 50 : pageSize;
-	// if ( req.query.price2 == null && req.query.km2 == null && req.query.greaterThanPrice == null && 
-	// 	 req.query.lessThanPrice == null && req.query.lessThanKm == null && req.query.greaterThanKm == null 
-	// 	 req.query.year2 == null && req.query.grearThanYear == null && req.query.lessThanYear == null) {
 			var params = {
 				id: req.query.id == undefined? undefined:req.query.id,
 				ColorId : req.query.colorId == undefined ? undefined: req.query.colorId,

@@ -74,6 +74,12 @@ router.put('/',authentication,authorization,function (req,res){
 * @param [res] Respuesta del servidor.
 * @param [req] Peticion del cliente.
 */
+/* 
+* @brief
+*  funcion que se encarga de hacer search en los colores
+* @param [c] el objeto Carro.
+* @param [callback] callback 
+*/
 router.get('/',function (req,res){
 	var params = {
 		id: req.query.id,	
