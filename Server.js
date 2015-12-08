@@ -13,12 +13,15 @@ var express = require('express'),
 	fs = require('fs');
 	FileStreamRotator = require('file-stream-rotator');
 	logdir = __dirname + '/logs';
+	path = require('path');
+
 fs.existsSync(logdir) || fs.mkdirSync(logdir);
 var accessLogStream = FileStreamRotator.getStream({
   filename: logdir + '/access-%DATE%.log',
   frequency: 'daily',
   verbose: false
 })
+app.use("/cars",express.static(path.join(__dirname, 'cars')));
 app.use(morgan('combined',{stream: accessLogStream}));
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
@@ -37,6 +40,7 @@ app.use('/colors',ColorController);
 
 
 app.all("*",function(req,res){
-	responseHelpers.sendResponse(res,200,{message:"Route Not Found!,Api Is Up And Running!!!!"},null);
+	res.sendfile("./Controller/test.html")
+	//responseHelpers.sendResponse(res,200,{message:"Route Not Found!,Api Is Up And Running!!!!"},null);
 });
 app.listen(3000);

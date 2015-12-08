@@ -1,4 +1,4 @@
-exports.version = '1.0.0';
+exports.version = '1.0.0'; 
 	fs = require('fs');
 	Guid = require ('guid');
 	Model = require('./../models/db.js');
@@ -17,18 +17,9 @@ exports.version = '1.0.0';
 */
 exports.getImage = function (id,callback){
 	Images.findAll({where:{CarId:id}}).then(function(collection){
-		async.forEachSeries(collection,function(value,callback1){
-			value.dataValues.base64Image = fs.readFileSync(value.dataValues.imagepath).toString('base64');
-			callback1();
-		},function(err){
-			if (err) 
-				callback(err,null);
-			else {
-				callback(null,collection);
-				
-			}
-		});
-	});	
+			callback(null,collection)
+	});
+
 }
 /* 
 * @brief
@@ -37,17 +28,18 @@ exports.getImage = function (id,callback){
 * @param [id] id del carro
 * @param [callback] callback 
 */
-exports.addImage = function (base64,id,callback){
-	var decoded = new Buffer(base64,'base64');
-		var imagepath = 'cars/'+Guid.raw()+'.jpg'
-		fs.writeFile(imagepath,decoded,'binary',function(err){
-			Images.create({
-				imagepath: imagepath,
-				CarId : id
-			})
-			.then(function(c){
-				if ( callback != null )
-					callback();
+exports.addImage = function (path,id,callback){
+		fs.readFile(path,function(err,data){
+			var imagepath = 'cars/'+Guid.raw()+'.jpg'	
+			fs.writeFile(imagepath,data,function(err){
+				Images.create({
+					imagepath: imagepath,
+					CarId : id
+				})
+				.then(function(c){
+					if ( callback != null )
+						callback();
+				});
 			});
 		});
 }
@@ -59,37 +51,12 @@ exports.addImage = function (base64,id,callback){
 * @param [callback1] callback 
 */
 exports.updateImage = function(imageCollection,id,callback1){
-	Images.findAll({where:{CarId:id}}).then(function(collection){
-		console.log(imageCollection);
-		async.forEachSeries(imageCollection,function(value,callback){
-			
-			var found = false;
-			for (var i in collection)
-			{
-				if (collection[i].dataValues.imagepath == value.imagepath){
-					found=true;
-					delete collection[i];
-					break;
-				}
-			}
-			if (value.imagepath == null || value.imagepath == "" ){
-				exports.addImage(value.base64Image,id,function(){
-					callback();
-				});
-			}
-			else if (found) {
-				var decoded = new Buffer(value.base64Image,'base64');
-				fs.writeFileSync(value.imagepath,decoded,'binary');
+	exports.deleteImages(id, function(err){
+		async.forEachSeries(imageCollection,function(value,callback){	
+			exports.addImage(value.path,id,function() {
 				callback();
-			}
-			else {
-				callback();
-			}
+			});
 		},function(err){
-			for ( var i in collection )
-			{
-				deleteImagesById(collection[i].dataValues.imagepath);
-			}
 			callback1();
 		});
 	});
@@ -101,7 +68,6 @@ exports.updateImage = function(imageCollection,id,callback1){
 * @param [callback] callback 
 */
 exports.returnCar = function (c,callback){
-	console.log(c.dataValues);	
 	async.waterfall([function(callback2){
 		Models.findById(c.dataValues.ModelId).then(function(model){
 			callback2(null,model);
@@ -121,8 +87,6 @@ exports.returnCar = function (c,callback){
 		});
 
 	},function(manufacturer,callback2){
-
-			console.log(c.dataValues);	
 		c.dataValues.Manufacturer = manufacturer;
 
 		exports.getImage(c.dataValues.id,function(err,images){
@@ -181,6 +145,7 @@ exports.deleteImages= function(id,callback){
 */
 function deleteImagesById (id){
 	Images.findById(id).then(function(image){
+		console.log(image.dataValues.imagepath);
 		fs.unlink(image.dataValues.imagepath);
 		image.destroy();
 	});

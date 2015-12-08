@@ -9,6 +9,8 @@ var responseHelpers = require('./../Helpers/responseHelper.js'),
 	authentication = require('./../Helpers/AuthenticationHelper.js').authentication,
 	authorization = require('./../Helpers/AuthenticationHelper.js').authorization,
 	carHelper = require('./../Helpers/CarHelper.js');
+	multipart  = require('connect-multiparty');
+	var multipartMiddleware = multipart();
 	exports.version = "1.0.0";
 /* 
 * @brief
@@ -17,7 +19,7 @@ var responseHelpers = require('./../Helpers/responseHelper.js'),
 * @param [res] Respuesta del servidor.
 * @param [req] Peticion del cliente.
 */
-router.post('/',authentication,function (req,res){
+router.post('/',authentication,multipartMiddleware,function (req,res){ 
 			Car.create({
 				UserUserName:  res.userName,
 				ManufacturerId: req.body.manufacturerId,
@@ -30,8 +32,9 @@ router.post('/',authentication,function (req,res){
 		 	    price:          req.body.price}
 			)		
 		.then(function(c){
-			async.forEachSeries(req.body.image,function(value,callback){
-				carHelper.addImage(value,c.id,function(){
+			async.forEachSeries(req.files,function(value,callback){
+				console.log(value.path);
+				carHelper.addImage(value.path,c.id,function(){
 					callback();		
 				});
 				
@@ -83,13 +86,15 @@ router.delete('/:carid',authentication,function (req,res){
 * @param [authentication] Se encarga de validar que el token suministrado sea valido.
 * @param [req] Peticion del cliente.
 */
-router.put('/',authentication,function (req,res){
+router.post('/',authentication,multipartMiddleware,function (req,res){
+	console.log("Entro!");
 	Car.findOne({where: { id: req.body.id} })
 		.then(function (c) {
 			if (c == null ){
 				responseHelpers.sendResponse(res,400,{message: "No existen carros con este id."},null);
 			}
-			carHelper.updateImage(req.body.image,c.id,function(){
+			console.log(req.files);
+			carHelper.updateImage(req.files,c.id,function(){
 				c.updateAttributes({
 					ColorId : req.body.colorId,
 					ModelId : req.body.modelId,
@@ -163,11 +168,11 @@ router.get('/',function (req,res){
 				  		)
 				  		delete params[key];
 				  }
-	  	Car.findAll({ where: params, offset: (page-1)*pageSize, limit: pageSize})
+	  	Car.findAndCountAll({ where: params, offset: (page-1)*pageSize, limit: pageSize})
 	 		.then(function(collection){
-	 			carHelper.returnCars(collection,function(err,result){
+	 			carHelper.returnCars(collection.rows,function(err,result){
 	 				if (err == null) 
-	 					responseHelpers.sendResponse(res,200,null,result);		
+	 					responseHelpers.sendResponse(res,200,{message:collection.count},result);		
 	 				else 
 	 					responseHelpers.sendResponse(res,400,{message:err.message},null);	
 	 			});
