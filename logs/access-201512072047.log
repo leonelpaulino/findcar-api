@@ -1,1 +1,0 @@
-127.0.0.1 - - [08/Dec/2015:04:47:06 +0000] "POST /cars/ HTTP/1.1" 200 - "http://localhost:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:41.0) Gecko/20100101 Firefox/41.0"
