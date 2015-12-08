@@ -88,7 +88,6 @@ exports.returnCar = function (c,callback){
 
 	},function(manufacturer,callback2){
 		c.dataValues.Manufacturer = manufacturer;
-
 		exports.getImage(c.dataValues.id,function(err,images){
 			
 			callback2(null,images);

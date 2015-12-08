@@ -168,11 +168,11 @@ router.get('/',function (req,res){
 				  		)
 				  		delete params[key];
 				  }
-	  	Car.find({ where: params, offset: (page-1)*pageSize, limit: pageSize})
+	  	Car.findAndCountAll({ where: params, offset: (page-1)*pageSize, limit: pageSize})
 	 		.then(function(collection){
-	 			carHelper.returnCars(collection,function(err,result){
+	 			carHelper.returnCars(collection.rows,function(err,result){
 	 				if (err == null) 
-	 					responseHelpers.sendResponse(res,200,null,result);		
+	 					responseHelpers.sendResponse(res,200,{message:collection.count},result);		
 	 				else 
 	 					responseHelpers.sendResponse(res,400,{message:err.message},null);	
 	 			});

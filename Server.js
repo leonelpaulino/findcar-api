@@ -21,7 +21,7 @@ var accessLogStream = FileStreamRotator.getStream({
   frequency: 'daily',
   verbose: false
 })
-app.use("/cars",express.static(path.join(__dirname, 'cars')));
+app.use("/photos",express.static(path.join(__dirname, 'photos')));
 app.use(morgan('combined',{stream: accessLogStream}));
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));

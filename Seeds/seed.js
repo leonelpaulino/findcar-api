@@ -100,10 +100,10 @@ async.waterfall([function(callback){
 		});	
 	});
 },function(val,callback){
-	Images.create({imagepath:'./cars/1.jpg',CarId:1});
-	Images.create({imagepath:'./cars/2.jpg',CarId:2});
-	Images.create({imagepath:'./cars/3.jpg',CarId:3});
-	Images.create({imagepath:'./cars/4.jpg',CarId:4});
-	Images.create({imagepath:'./cars/5.jpg',CarId:5});
-	Images.create({imagepath:'./cars/6.jpg',CarId:6});
+	Images.create({imagepath:'./photos/1.jpg',CarId:1});
+	Images.create({imagepath:'./photos/2.jpg',CarId:2});
+	Images.create({imagepath:'./photos/3.jpg',CarId:3});
+	Images.create({imagepath:'./photos/4.jpg',CarId:4});
+	Images.create({imagepath:'./photos/5.jpg',CarId:5});
+	Images.create({imagepath:'./photos/6.jpg',CarId:6});
 }]);

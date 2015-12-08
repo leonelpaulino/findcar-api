@@ -32,7 +32,7 @@ router.post('/login', function (req,res) {
 				var token = jsonwebtoken.sign({userName:req.body.userName},secretKey,{
 					 expiresInMinutes: 10
 				});
-				responseHelpers.sendResponse(res,200,null,{token:token});
+				responseHelpers.sendResponse(res,200,null,{token:token,isAdmin:u.isAdmin});
 			}
 			else {
 				responseHelpers.sendResponse(res,400,{message:"Autenticación fallida. Contraseña no es valida."},null);
