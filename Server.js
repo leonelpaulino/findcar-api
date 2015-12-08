@@ -21,9 +21,18 @@ var accessLogStream = FileStreamRotator.getStream({
   frequency: 'daily',
   verbose: false
 })
+//CORS middleware
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', 'example.com');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+    next();
+}
+
 app.use("/cars",express.static(path.join(__dirname, 'cars')));
 app.use(morgan('combined',{stream: accessLogStream}));
-app.use(cors());
+app.use(allowCrossDomain());
 app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
 
 app.use(bodyParser.json({limit: '50mb'}));
@@ -40,7 +49,6 @@ app.use('/colors',ColorController);
 
 
 app.all("*",function(req,res){
-	res.sendfile("./Controller/test.html")
-	//responseHelpers.sendResponse(res,200,{message:"Route Not Found!,Api Is Up And Running!!!!"},null);
+	responseHelpers.sendResponse(res,200,{message:"Route Not Found!,Api Is Up And Running!!!!"},null);
 });
 app.listen(3000);

@@ -86,7 +86,7 @@ router.delete('/:carid',authentication,function (req,res){
 * @param [authentication] Se encarga de validar que el token suministrado sea valido.
 * @param [req] Peticion del cliente.
 */
-router.post('/',authentication,multipartMiddleware,function (req,res){
+router.put('/',authentication,multipartMiddleware,function (req,res){
 	console.log("Entro!");
 	Car.findOne({where: { id: req.body.id} })
 		.then(function (c) {
